@@ -77,8 +77,8 @@ class VirtualAnalogStick:
         dot_color = (0, 0, 255)
         dot_radius = 10
 
-        # Draw the circle representing the analog stick
-        cv2.circle(frame, stick_center, stick_radius, stick_color, 2)
+        
+       
         # Draw lines within the circle
         for i in range(-stick_radius, stick_radius+1, 10):
             x = int(np.sqrt(stick_radius**2 - i**2))
@@ -95,6 +95,19 @@ class VirtualAnalogStick:
         # Draw the vertical center line bolded
         cv2.line(frame, (stick_center[0], stick_center[1]-stick_radius), (stick_center[0], stick_center[1]+stick_radius), stick_color, 5)
         
+         # Create a horizontal and vertical deadzone by drawing parallel horizontal and vertical lines a deadzone distance away from the center lines
+        deadzone_distance = stick_radius // 10
+        deadzone_color = (255, 0, 0)
+        # Draw the horizontal deadzone lines
+        cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]-deadzone_distance), (stick_center[0]+stick_radius, stick_center[1]-deadzone_distance), deadzone_color, 2)
+        cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]+deadzone_distance), (stick_center[0]+stick_radius, stick_center[1]+deadzone_distance), deadzone_color, 2)
+        # Draw the vertical deadzone lines
+        cv2.line(frame, (stick_center[0]-deadzone_distance, stick_center[1]-stick_radius), (stick_center[0]-deadzone_distance, stick_center[1]+stick_radius), deadzone_color, 2)
+        cv2.line(frame, (stick_center[0]+deadzone_distance, stick_center[1]-stick_radius), (stick_center[0]+deadzone_distance, stick_center[1]+stick_radius), deadzone_color, 2)
+
+        # Draw the circle representing the analog stick
+        cv2.circle(frame, stick_center, stick_radius, stick_color, 3)
+
         # Calculate the position of the dot within the stick's range
         offset_x = wrist_x - stick_center[0]
         offset_y = wrist_y - stick_center[1]

@@ -81,18 +81,20 @@ class VirtualAnalogStick:
         cv2.circle(frame, stick_center, stick_radius, stick_color, 2)
         # Draw lines within the circle
         for i in range(-stick_radius, stick_radius+1, 10):
+            x = int(np.sqrt(stick_radius**2 - i**2))
+            y = int(np.sqrt(stick_radius**2 - i**2))
             # Draw horizontal lines
-            cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]+i), (stick_center[0]+stick_radius, stick_center[1]+i), stick_color, 1)
+            cv2.line(frame, (stick_center[0]-x, stick_center[1]+i), (stick_center[0]+x, stick_center[1]+i), stick_color, 1)
+            # cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]+i), (stick_center[0]+stick_radius, stick_center[1]+i), stick_color, 1)
             # Draw vertical lines
-            cv2.line(frame, (stick_center[0]+i, stick_center[1]-stick_radius), (stick_center[0]+i, stick_center[1]+stick_radius), stick_color, 1)
+            cv2.line(frame, (stick_center[0]+i, stick_center[1]-y), (stick_center[0]+i, stick_center[1]+y), stick_color, 1)
+            # cv2.line(frame, (stick_center[0]+i, stick_center[1]-stick_radius), (stick_center[0]+i, stick_center[1]+stick_radius), stick_color, 1)
+            
+        # Draw the horizontal center line bolded
+        cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]), (stick_center[0]+stick_radius, stick_center[1]), stick_color, 5)
+        # Draw the vertical center line bolded
+        cv2.line(frame, (stick_center[0], stick_center[1]-stick_radius), (stick_center[0], stick_center[1]+stick_radius), stick_color, 5)
         
-        # Draw more defined lines for the middle portion
-        for i in range(-stick_radius, stick_radius+1, 50):
-            # Draw horizontal lines
-            cv2.line(frame, (stick_center[0]-stick_radius, stick_center[1]+i), (stick_center[0]+stick_radius, stick_center[1]+i), stick_color, 2)
-            # Draw vertical lines
-            # Draw vertical lines within the circle
-            cv2.line(frame, (stick_center[0]+i, stick_center[1]-stick_radius), (stick_center[0]+i, stick_center[1]+stick_radius), stick_color, 2)
         # Calculate the position of the dot within the stick's range
         offset_x = wrist_x - stick_center[0]
         offset_y = wrist_y - stick_center[1]

@@ -1,53 +1,40 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import HandTracking as ht
 
 class VirtualAnalogStick:
     def __init__(self):
-        # Initialize Mediapipe hand detection and drawing utilities
         self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
         self.mp_drawing = mp.solutions.drawing_utils
-        self.cap = None
-        self.frame_width = 640
-        self.frame_height = 480
         self.x = -1
         self.y = -1
+        self.hand_tracker = ht.HandTracking()    
 
     def start(self):
         """Start the video capture."""
-        self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
-
+        self.hand_tracker.start()
+        
     def close(self):
         """Release the video capture and close all OpenCV windows."""
-        if self.cap:
-            self.cap.release()
+        self.hand_tracker.close()
         cv2.destroyAllWindows()
 
     def is_opened(self):
         """Check if the video capture is open."""
-        return self.cap.isOpened()
+        return self.hand_tracker.is_opened()
 
     def update(self):
         """Capture frames from the camera, process hand landmarks, and display the results."""
-        if self.cap is None or not self.cap.isOpened():
+        if not self.hand_tracker.is_opened():
             print("Camera is not opened.")
             return
-
-        success, image = self.cap.read()
-        if not success:
-            print("Failed to capture image.")
-            return
-
-        # Flip the image horizontally for a later selfie-view display
-        image = cv2.flip(image, 1)
-        # Convert the BGR image to RGB
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        
+        self.hand_tracker.update(draw_camera=False, draw_angles=True, terminal_out=True)
 
         # Process the image and detect hands
-        results = self.hands.process(image_rgb)
+        results = self.hand_tracker.get_results()
+        image = self.hand_tracker.get_last_image()
 
         # Draw hand landmarks and connections
         if results.multi_hand_landmarks:
@@ -55,12 +42,12 @@ class VirtualAnalogStick:
                 self.mp_drawing.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
                 
                 # Get wrist coordinates
-                wrist_landmark = hand_landmarks.landmark[self.mp_hands.HandLandmark.WRIST]
-                wrist_x = int(wrist_landmark.x * self.frame_width)
-                wrist_y = int(wrist_landmark.y * self.frame_height)
+                index_landmark = hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                index_x = int(index_landmark.x * self.hand_tracker.cap_width)
+                index_y = int(index_landmark.y * self.hand_tracker.cap_height)
                 
                 # Draw the virtual analog stick
-                self.draw_virtual_analog_stick(image, wrist_x, wrist_y)
+                self.draw_virtual_analog_stick(image, index_x, index_y)
 
         # Display the images
         cv2.imshow('Virtual Analog Stick', image)
@@ -71,12 +58,11 @@ class VirtualAnalogStick:
 
     def draw_virtual_analog_stick(self, frame, wrist_x, wrist_y):
         """Draw a virtual analog stick on the frame."""
-        stick_center = (self.frame_width // 2, self.frame_height // 2)
+        stick_center = (self.hand_tracker.cap_width // 2, self.hand_tracker.cap_height // 2)
         stick_radius = 200
         stick_color = (0, 255, 0)
         dot_color = (0, 0, 255)
         dot_radius = 10
-
         
        
         # Draw lines within the circle

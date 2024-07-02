@@ -6,6 +6,8 @@ description...
 - Make the analog stick more modular
     - You can feed in any image and you can just tell it where on the image you want to draw the analog stick
     - Make control more general, more applicable to other games, vehicles, etc
+    - Make method measurements relative rather than absolute
+        - Instead of pixels, use percentages
 - Make hand gestures
     - Acceleration?
     - Braking?

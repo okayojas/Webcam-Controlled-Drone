@@ -113,6 +113,13 @@ class VirtualAnalogStick:
         offset_y = wrist_y - stick_center[1]
         distance = np.sqrt(offset_x**2 + offset_y**2)
         
+        if abs(offset_x) < deadzone_distance:
+            offset_x = 0
+        
+        if abs(offset_y) < deadzone_distance:
+            offset_y = 0
+            
+        
         if distance > stick_radius:
             angle = np.arctan2(offset_y, offset_x)
             offset_x = int(stick_radius * np.cos(angle))
@@ -124,7 +131,7 @@ class VirtualAnalogStick:
         # Draw the dot
         cv2.circle(frame, dot_position, dot_radius, dot_color, -1)
         self.x = offset_x / stick_radius
-        self.y = offset_y / stick_radius
+        self.y = -offset_y / stick_radius
 
 def main():
     analog_stick = VirtualAnalogStick()

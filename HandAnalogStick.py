@@ -23,6 +23,12 @@ class VirtualAnalogStick:
     def is_opened(self):
         """Check if the video capture is open."""
         return self.hand_tracker.is_opened()
+    
+    def get_angle(self, finger):
+        return self.hand_tracker.get_angle(finger)
+    
+    def get_percent(self, finger):
+        return self.hand_tracker.get_percent(finger)
 
     def update(self):
         """Capture frames from the camera, process hand landmarks, and display the results."""
@@ -37,17 +43,17 @@ class VirtualAnalogStick:
         image = self.hand_tracker.get_last_image()
 
         # Draw hand landmarks and connections
-        if results.multi_hand_landmarks:
+        if results and results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 self.mp_drawing.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
                 
                 # Get wrist coordinates
-                index_landmark = hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
-                index_x = int(index_landmark.x * self.hand_tracker.cap_width)
-                index_y = int(index_landmark.y * self.hand_tracker.cap_height)
+                wrist_landmark = hand_landmarks.landmark[self.mp_hands.HandLandmark.WRIST]
+                wrist_x = int(wrist_landmark.x * self.hand_tracker.cap_width)
+                wrist_y = int(wrist_landmark.y * self.hand_tracker.cap_height)
                 
                 # Draw the virtual analog stick
-                self.draw_virtual_analog_stick(image, index_x, index_y)
+                self.draw_virtual_analog_stick(image, wrist_x, wrist_y)
 
         # Display the images
         cv2.imshow('Virtual Analog Stick', image)
